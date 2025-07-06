@@ -25,11 +25,7 @@ contract DeployDefiSalmon is ScaffoldETHDeploy {
      *      - Export contract addresses & ABIs to `nextjs` packages
      */
     function run() external ScaffoldEthDeployerRunner {
-        // For now, using placeholder addresses for WETH and USDT
-        // In a real deployment, these would be actual token addresses
-        address weth = 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2; // Mainnet WETH
-        address usdt = 0xdAC17F958D2ee523a2206206994597C13D831ec7; // Mainnet USDT
-        DefiSalmon defiSalmon = new DefiSalmon(weth, usdt);
+        DefiSalmon defiSalmon = new DefiSalmon();
         addDeployment("DefiSalmon", address(defiSalmon));
     }
 }

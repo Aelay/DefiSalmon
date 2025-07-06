@@ -2,100 +2,73 @@
 pragma solidity ^0.8.0;
 
 interface IERC20 {
-    function transfer(address to, uint amount) external returns (bool);
-    function transferFrom(address from, address to, uint amount) external returns (bool);
+    function transferFrom(address from, address to, uint256 amount) external returns (bool);
+    function transfer(address to, uint256 amount) external returns (bool);
+}
+
+interface IERC721 {
+    function transferFrom(address from, address to, uint256 tokenId) external;
 }
 
 contract DefiSalmon {
-    mapping(address => mapping(address => uint)) public deposits;
-    mapping(address => mapping(address => uint)) public borrows;
-    address public immutable WETH;
-    address public immutable USDT;
+    address public constant WETH = 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2;
+    address public constant USDT = 0xdAC17F958D2ee523a2206206994597C13D831ec7;
     
-    // Simple price oracle (in practice, use Chainlink)
-    uint public wethPrice = 2000e6; // $2000 in USDT (6 decimals)
-    uint public liquidationThreshold = 8000; // 80% (8000/10000)
-    uint public liquidationBonus = 500; // 5% bonus (500/10000)
-
-    constructor(address _weth, address _usdt) {
-        WETH = _weth;
-        USDT = _usdt;
-    }
-
-    function deposit(address asset, uint amount) external {
-        require(asset == WETH || asset == USDT, "Invalid asset");
-        IERC20(asset).transferFrom(msg.sender, address(this), amount);
-        deposits[msg.sender][asset] += amount;
-    }
-
-    function withdraw(address asset, uint amount) external {
-        require(asset == WETH || asset == USDT, "Invalid asset");
-        require(deposits[msg.sender][asset] >= amount, "Not enough deposits");
-        deposits[msg.sender][asset] -= amount;
-        require(getHealthFactor(msg.sender) >= 1e18, "Health factor too low");
-        IERC20(asset).transfer(msg.sender, amount);
-    }
-
-    function borrow(address asset, uint amount) external {
-        require(asset == WETH || asset == USDT, "Invalid asset");
-        require(IERC20(asset).transfer(msg.sender, amount), "Not enough liquidity");
-        borrows[msg.sender][asset] += amount;
-        require(getHealthFactor(msg.sender) >= 1e18, "Health factor too low");
-    }
-
-    function repay(address asset, uint amount) external {
-        require(asset == WETH || asset == USDT, "Invalid asset");
-        IERC20(asset).transferFrom(msg.sender, address(this), amount);
-        borrows[msg.sender][asset] -= amount;
-    }
-
-    function liquidate(address user, address asset) external {
-        require(getHealthFactor(user) < 1e18, "User not liquidatable");
-        uint borrowed = borrows[user][asset];
-        require(borrowed > 0, "Nothing to liquidate");
-        
-        uint collateralValue = getCollateralValue(user);
-        uint debtValue = getDebtValue(user);
-        uint maxRepay = (debtValue * liquidationThreshold) / 10000;
-        
-        uint repayAmount = borrowed;
-        if (getAssetValue(asset, borrowed) > maxRepay) {
-            repayAmount = (maxRepay * 1e18) / getAssetPrice(asset);
+    mapping(address => mapping(address => uint256)) public deposits; // user -> token -> amount
+    mapping(address => uint256[]) public userNFTs;
+    mapping(uint256 => address) public nftOwner;
+    mapping(address => uint256) public borrows;
+    
+    function deposit(string memory token, uint256 amount) external {
+        if (keccak256(abi.encodePacked(token)) == keccak256(abi.encodePacked("weth"))) {
+            IERC20(WETH).transferFrom(msg.sender, address(this), amount * 1e18);
+            deposits[msg.sender][WETH] += amount * 1e18;
+        } else if (keccak256(abi.encodePacked(token)) == keccak256(abi.encodePacked("usdt"))) {
+            IERC20(USDT).transferFrom(msg.sender, address(this), amount * 1e6);
+            deposits[msg.sender][USDT] += amount * 1e6;
+        } else {
+            revert("Use 'weth' or 'usdt'");
         }
-        
-        IERC20(asset).transferFrom(msg.sender, address(this), repayAmount);
-        borrows[user][asset] -= repayAmount;
-        
-        uint bonus = (repayAmount * liquidationBonus) / 10000;
-        uint liquidatorReward = repayAmount + bonus;
-        
-        // Give liquidator WETH as reward (simplified)
-        uint rewardAmount = (liquidatorReward * getAssetPrice(asset)) / wethPrice;
-        IERC20(WETH).transfer(msg.sender, rewardAmount);
     }
-
-    function getHealthFactor(address user) public view returns (uint) {
-        uint collateralValue = getCollateralValue(user);
-        uint debtValue = getDebtValue(user);
-        if (debtValue == 0) return type(uint).max;
-        return (collateralValue * liquidationThreshold) / (debtValue * 10000);
+    
+    function depositV3Pos(uint256 tokenId) external {
+        IERC721(0xC36442b4a4522E871399CD717aBDD847Ab11FE88).transferFrom(msg.sender, address(this), tokenId);
+        userNFTs[msg.sender].push(tokenId);
+        nftOwner[tokenId] = msg.sender;
     }
-
-    function getCollateralValue(address user) internal view returns (uint) {
-        return getAssetValue(WETH, deposits[user][WETH]) + 
-               getAssetValue(USDT, deposits[user][USDT]);
+    
+    function withdraw(address token, uint256 amount) external {
+        require(token == WETH || token == USDT, "Invalid token");
+        require(deposits[msg.sender][token] >= amount, "Insufficient balance");
+        deposits[msg.sender][token] -= amount;
+        IERC20(token).transfer(msg.sender, amount);
     }
-
-    function getDebtValue(address user) internal view returns (uint) {
-        return getAssetValue(WETH, borrows[user][WETH]) + 
-               getAssetValue(USDT, borrows[user][USDT]);
+    
+    function borrow(uint256 amount) external {
+        require(getCollateralValue(msg.sender) > 0, "No collateral");
+        borrows[msg.sender] += amount;
     }
-
-    function getAssetValue(address asset, uint amount) internal view returns (uint) {
-        return (amount * getAssetPrice(asset)) / 1e18;
+    
+    function getCollateralValue(address user) public view returns (uint256) {
+        return deposits[user][WETH] + deposits[user][USDT] + (userNFTs[user].length * 1000); // Simple NFT value
     }
-
-    function getAssetPrice(address asset) internal view returns (uint) {
-        return asset == WETH ? wethPrice : 1e6; // USDT = $1
+    
+    function repay(uint256 amount) external {
+        borrows[msg.sender] -= amount;
+    }
+    
+    function getNFTCount(address user) external view returns (uint256) {
+        return userNFTs[user].length;
+    }
+    
+    // For testing - mint some USDT
+    function mintTestUSDT(uint256 amount) public {
+        deposits[msg.sender][USDT] += amount;
+    }
+    
+    // For testing - wrap ETH to WETH
+    function wrapETH() public payable {
+        require(msg.value > 0, "Send ETH");
+        deposits[msg.sender][WETH] += msg.value;
     }
 } 

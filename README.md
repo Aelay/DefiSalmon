@@ -1,4 +1,39 @@
-# 🏗 Scaffold-ETH 2
+# DefiSalmon
+
+
+UNISWAP v3 LP Positions with built-in leverage and hedging
+
+
+
+## Motivation
+
+
+Currently LPs on Uniswap v3 (volume) are forced to hedge their positions elsewhere (aave and such), which is not capital efficient.
+
+Money locked in the position is not counted towards collateral.
+
+Hedging however is crucial for volatile pairs, such as ETHUSD (huge market, volume...)
+
+Eg if a user puts ETH into AAVE, and deploys 80% of capital, borrowed against eth into an LP position, they effectively have 0.8 leverage (and thats at the liquidation limit!)
+
+
+
+## Solution
+
+DefiSalmon is a lending market that takes ranged LP positions as collateral and will present a unified interface for LPs where they can specify their leverage, hedge and price parameters and deploy capital in one smooth transaction.
+
+
+
+## Liquidations
+
+Lending is controlled through liquidations.
+
+
+
+
+## Deployment 
+
+## 🏗 Scaffold-ETH 2
 
 <h4 align="center">
   <a href="https://docs.scaffoldeth.io">Documentation</a> |
