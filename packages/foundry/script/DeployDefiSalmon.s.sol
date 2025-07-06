@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.19;
+pragma solidity ^0.8.0;
 
 import "./DeployHelpers.s.sol";
 import "../contracts/DefiSalmon.sol";
@@ -27,5 +27,13 @@ contract DeployDefiSalmon is ScaffoldETHDeploy {
     function run() external ScaffoldEthDeployerRunner {
         DefiSalmon defiSalmon = new DefiSalmon();
         addDeployment("DefiSalmon", address(defiSalmon));
+
+        console.log("DefiSalmon deployed to:", address(defiSalmon));
+        console.log("WETH address:", defiSalmon.WETH());
+        console.log("USDT address:", defiSalmon.USDT());
+        console.log("ETH/USD Feed:", defiSalmon.ETH_USD_FEED());
+        console.log("Position Manager:", defiSalmon.POSITION_MANAGER());
+        console.log("Uniswap Router:", defiSalmon.UNISWAP_V3_ROUTER());
+        console.log("WETH/USDT Pool:", defiSalmon.WETH_USDT_POOL());
     }
 }

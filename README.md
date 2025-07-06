@@ -14,7 +14,7 @@ Money locked in the position is not counted towards collateral.
 
 Hedging however is crucial for volatile pairs, such as ETHUSD (huge market, volume...)
 
-Eg if a user puts ETH into AAVE, and deploys 80% of capital, borrowed against eth into an LP position, they effectively have 0.8 leverage (and thats at the liquidation limit!)
+Eg if a user puts ETH into AAVE, and deploys 80% of capital borrowed against eth into an LP position, they effectively have 0.8 leverage (and thats at the liquidation limit!)
 
 
 
