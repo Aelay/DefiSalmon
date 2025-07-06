@@ -7,7 +7,7 @@ import { GenericContractsDeclaration } from "~~/utils/scaffold-eth/contract";
 const deployedContracts = {
   31337: {
     YourContract: {
-      address: "0x196dbcbb54b8ec4958c959d8949ebfe87ac2aaaf",
+      address: "0x5b3120d0da5fdcba7aef87a9c3c64829c1c0d76b",
       abi: [
         {
           type: "constructor",
@@ -148,28 +148,12 @@ const deployedContracts = {
         },
       ],
       inheritedFunctions: {},
-      deploymentFile: "run-1751766108.json",
+      deploymentFile: "run-1751768535.json",
       deploymentScript: "Deploy.s.sol",
     },
     DefiSalmon: {
-      address: "0x82c6d3ed4cd33d8ec1e51d0b5cc1d822eaa0c3dc",
+      address: "0x33b1b5aa9aa4da83a332f0bc5cac6a903fde5d92",
       abi: [
-        {
-          type: "constructor",
-          inputs: [
-            {
-              name: "_weth",
-              type: "address",
-              internalType: "address",
-            },
-            {
-              name: "_usdt",
-              type: "address",
-              internalType: "address",
-            },
-          ],
-          stateMutability: "nonpayable",
-        },
         {
           type: "function",
           name: "USDT",
@@ -201,11 +185,6 @@ const deployedContracts = {
           name: "borrow",
           inputs: [
             {
-              name: "asset",
-              type: "address",
-              internalType: "address",
-            },
-            {
               name: "amount",
               type: "uint256",
               internalType: "uint256",
@@ -218,11 +197,6 @@ const deployedContracts = {
           type: "function",
           name: "borrows",
           inputs: [
-            {
-              name: "",
-              type: "address",
-              internalType: "address",
-            },
             {
               name: "",
               type: "address",
@@ -243,12 +217,25 @@ const deployedContracts = {
           name: "deposit",
           inputs: [
             {
-              name: "asset",
-              type: "address",
-              internalType: "address",
+              name: "token",
+              type: "string",
+              internalType: "string",
             },
             {
               name: "amount",
+              type: "uint256",
+              internalType: "uint256",
+            },
+          ],
+          outputs: [],
+          stateMutability: "nonpayable",
+        },
+        {
+          type: "function",
+          name: "depositV3Pos",
+          inputs: [
+            {
+              name: "tokenId",
               type: "uint256",
               internalType: "uint256",
             },
@@ -282,7 +269,7 @@ const deployedContracts = {
         },
         {
           type: "function",
-          name: "getHealthFactor",
+          name: "getCollateralValue",
           inputs: [
             {
               name: "user",
@@ -301,26 +288,14 @@ const deployedContracts = {
         },
         {
           type: "function",
-          name: "liquidate",
+          name: "getNFTCount",
           inputs: [
             {
               name: "user",
               type: "address",
               internalType: "address",
             },
-            {
-              name: "asset",
-              type: "address",
-              internalType: "address",
-            },
           ],
-          outputs: [],
-          stateMutability: "nonpayable",
-        },
-        {
-          type: "function",
-          name: "liquidationBonus",
-          inputs: [],
           outputs: [
             {
               name: "",
@@ -332,26 +307,8 @@ const deployedContracts = {
         },
         {
           type: "function",
-          name: "liquidationThreshold",
-          inputs: [],
-          outputs: [
-            {
-              name: "",
-              type: "uint256",
-              internalType: "uint256",
-            },
-          ],
-          stateMutability: "view",
-        },
-        {
-          type: "function",
-          name: "repay",
+          name: "mintTestUSDT",
           inputs: [
-            {
-              name: "asset",
-              type: "address",
-              internalType: "address",
-            },
             {
               name: "amount",
               type: "uint256",
@@ -363,8 +320,51 @@ const deployedContracts = {
         },
         {
           type: "function",
-          name: "wethPrice",
-          inputs: [],
+          name: "nftOwner",
+          inputs: [
+            {
+              name: "",
+              type: "uint256",
+              internalType: "uint256",
+            },
+          ],
+          outputs: [
+            {
+              name: "",
+              type: "address",
+              internalType: "address",
+            },
+          ],
+          stateMutability: "view",
+        },
+        {
+          type: "function",
+          name: "repay",
+          inputs: [
+            {
+              name: "amount",
+              type: "uint256",
+              internalType: "uint256",
+            },
+          ],
+          outputs: [],
+          stateMutability: "nonpayable",
+        },
+        {
+          type: "function",
+          name: "userNFTs",
+          inputs: [
+            {
+              name: "",
+              type: "address",
+              internalType: "address",
+            },
+            {
+              name: "",
+              type: "uint256",
+              internalType: "uint256",
+            },
+          ],
           outputs: [
             {
               name: "",
@@ -379,7 +379,7 @@ const deployedContracts = {
           name: "withdraw",
           inputs: [
             {
-              name: "asset",
+              name: "token",
               type: "address",
               internalType: "address",
             },
@@ -392,9 +392,16 @@ const deployedContracts = {
           outputs: [],
           stateMutability: "nonpayable",
         },
+        {
+          type: "function",
+          name: "wrapETH",
+          inputs: [],
+          outputs: [],
+          stateMutability: "payable",
+        },
       ],
       inheritedFunctions: {},
-      deploymentFile: "run-1751766108.json",
+      deploymentFile: "run-1751768535.json",
       deploymentScript: "Deploy.s.sol",
     },
   },
