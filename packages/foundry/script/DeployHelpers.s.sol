@@ -54,6 +54,10 @@ contract ScaffoldETHDeploy is Script {
         vm.stopBroadcast();
     }
 
+    function addDeployment(string memory name, address addr) internal {
+        deployments.push(Deployment(name, addr));
+    }
+
     function exportDeployments() internal {
         // fetch already existing contracts
         root = vm.projectRoot();
